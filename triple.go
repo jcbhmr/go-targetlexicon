@@ -53,6 +53,9 @@ const (
 	CallingConventionAppleAArch64
 )
 
+// An LLVM target “triple”. Historically such things had three fields, though they’ve added additional fields over time.
+//
+// Note that Triple doesn’t implement Default itself. If you want a type which defaults to the host triple, or defaults to unknown-unknown-unknown, use DefaultToHost or DefaultToUnknown, respectively.
 type Triple struct {
 	Architecture    Architecture
 	Vendor          Vendor

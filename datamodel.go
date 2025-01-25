@@ -1,19 +1,44 @@
 package targetlexicon
 
-import "fmt"
+// https://github.com/bytecodealliance/target-lexicon/blob/main/src/data_model.rs
+
+import (
+	"fmt"
+
+	"github.com/gohugoio/hashstructure"
+)
 
 // The size of a type.
-type Size int
+//
+// Copyable via assignment. Clonable via copy. Debuggable via [dataModelSize.GoString]. Equalable via "==". Hashable via default [github.com/gohugoio/hashstructure.Hash].
+type dataModelSize int
+
+var _ fmt.GoStringer = (*dataModelSize)(nil)
 
 const (
-	SizeU8 Size = iota
+	SizeU8 dataModelSize = iota
 	SizeU16
 	SizeU32
 	SizeU64
 )
 
+func (s dataModelSize) GoString() string {
+	switch s {
+	case SizeU8:
+		return "U8"
+	case SizeU16:
+		return "U16"
+	case SizeU32:
+		return "U32"
+	case SizeU64:
+		return "U64"
+	default:
+		panic("invalid Size")
+	}
+}
+
 // Return the number of bits this Size represents.
-func (s Size) Bits() uint8 {
+func (s dataModelSize) Bits() uint8 {
 	switch s {
 	case SizeU8:
 		return 8
@@ -24,14 +49,14 @@ func (s Size) Bits() uint8 {
 	case SizeU64:
 		return 64
 	default:
-		panic(fmt.Sprintf("unknown size variant %d", s))
+		panic("invalid Size")
 	}
 }
 
 // Return the number of bytes in a size.
 //
 // A byte is assumed to be 8 bits.
-func (s Size) Bytes() uint8 {
+func (s dataModelSize) Bytes() uint8 {
 	switch s {
 	case SizeU8:
 		return 1
@@ -42,7 +67,7 @@ func (s Size) Bytes() uint8 {
 	case SizeU64:
 		return 8
 	default:
-		panic(fmt.Sprintf("unknown size variant %d", s))
+		panic("invalid Size")
 	}
 }
 
@@ -50,12 +75,14 @@ func (s Size) Bytes() uint8 {
 //
 // See also https://en.cppreference.com/w/c/language/arithmetic_types
 //
-// NOT EXHAUSTIVE
-type CDataModel int
+// Not exhaustive. Copyable via assignment. Clonable via copy. Debuggable via [dataModelCDataModel.GoString]. Equalable via "==". Hashable via default [github.com/gohugoio/hashstructure.Hash].
+type dataModelCDataModel int
+
+var _ fmt.GoStringer = (*dataModelCDataModel)(nil)
 
 const (
 	// The data model used most commonly on Win16. long and pointer are 32 bits.
-	CDataModelLP32 CDataModel = iota
+	CDataModelLP32 dataModelCDataModel = iota
 	// The data model used most commonly on Win32 and 32-bit Unix systems.
 	//
 	// int, long, and pointer are all 32 bits.
@@ -74,8 +101,25 @@ const (
 	CDataModelILP64
 )
 
+func (c dataModelCDataModel) GoString() string {
+	switch c {
+	case CDataModelLP32:
+		return "LP32"
+	case CDataModelILP32:
+		return "ILP32"
+	case CDataModelLLP64:
+		return "LLP64"
+	case CDataModelLP64:
+		return "LP64"
+	case CDataModelILP64:
+		return "ILP64"
+	default:
+		panic("invalid CDataModel")
+	}
+}
+
 // The width of a pointer (in the default address space).
-func (c CDataModel) PointerWidth() Size {
+func (c dataModelCDataModel) PointerWidth() dataModelSize {
 	switch c {
 	case CDataModelLP32:
 		fallthrough
@@ -88,12 +132,12 @@ func (c CDataModel) PointerWidth() Size {
 	case CDataModelILP64:
 		return SizeU64
 	default:
-		panic(fmt.Sprintf("unknown data model %d", c))
+		panic("invalid CDataModel")
 	}
 }
 
 // The size of a C short. This is required to be at least 16 bits.
-func (c CDataModel) ShortSize() Size {
+func (c dataModelCDataModel) ShortSize() dataModelSize {
 	switch c {
 	case CDataModelLP32:
 		fallthrough
@@ -106,12 +150,12 @@ func (c CDataModel) ShortSize() Size {
 	case CDataModelILP64:
 		return SizeU16
 	default:
-		panic(fmt.Sprintf("unknown data model %d", c))
+		panic("invalid CDataModel")
 	}
 }
 
 // The size of a C int. This is required to be at least 16 bits.
-func (c CDataModel) IntSize() Size {
+func (c dataModelCDataModel) IntSize() dataModelSize {
 	switch c {
 	case CDataModelLP32:
 		return SizeU16
@@ -124,12 +168,12 @@ func (c CDataModel) IntSize() Size {
 	case CDataModelILP64:
 		return SizeU32
 	default:
-		panic(fmt.Sprintf("unknown data model %d", c))
+		panic("invalid CDataModel")
 	}
 }
 
 // The size of a C long. This is required to be at least 32 bits.
-func (c CDataModel) LongSize() Size {
+func (c dataModelCDataModel) LongSize() dataModelSize {
 	switch c {
 	case CDataModelLP32:
 		fallthrough
@@ -142,12 +186,12 @@ func (c CDataModel) LongSize() Size {
 	case CDataModelLP64:
 		return SizeU64
 	default:
-		panic(fmt.Sprintf("unknown data model %d", c))
+		panic("invalid CDataModel")
 	}
 }
 
 // The size of a C long long. This is required (in C99+) to be at least 64 bits.
-func (c CDataModel) LongLongSize() Size {
+func (c dataModelCDataModel) LongLongSize() dataModelSize {
 	switch c {
 	case CDataModelLP32:
 		fallthrough
@@ -160,14 +204,18 @@ func (c CDataModel) LongLongSize() Size {
 	case CDataModelILP64:
 		return SizeU64
 	default:
-		panic(fmt.Sprintf("unknown data model %d", c))
+		panic("invalid CDataModel")
 	}
 }
 
-func (CDataModel) FloatSize() Size {
+// The size of a C float.
+func (dataModelCDataModel) FloatSize() dataModelSize {
+	// TODO: This is probably wrong on at least one architecture.
 	return SizeU32
 }
 
-func (CDataModel) DoubleSize() Size {
+// The size of a C double.
+func (dataModelCDataModel) DoubleSize() dataModelSize {
+	// TODO: This is probably wrong on at least one architecture.
 	return SizeU64
 }

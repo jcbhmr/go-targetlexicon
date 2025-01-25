@@ -877,10 +877,45 @@ func (v VendorCustom) AsStr() string {
 	return v.A.AsStr()
 }
 
+// The minimum OS version that we’re compiling for.
+//
+// This is formatted as "major.minor.patch".
+//
+// The size of the parts here are limited by Mach-O’s LC_BUILD_VERSION.
+//
+// Copying is cloning. Comparable with "==". Sortable with [DeploymentTarget.Compare].
 type DeploymentTarget struct {
 	Major uint16
 	Minor uint8
 	Patch uint8
+}
+
+var _ fmt.GoStringer = (*DeploymentTarget)(nil)
+var _ interface{Compare(DeploymentTarget) int} = (*DeploymentTarget)(nil)
+
+func (d DeploymentTarget) GoString() string {
+	return fmt.Sprintf("DeploymentTarget{%d, %d, %d}", d.Major, d.Minor, d.Patch)
+}
+func (a DeploymentTarget) Compare(b DeploymentTarget) int {
+	if a.Major < b.Major {
+		return -1
+	} else if a.Major > b.Major {
+		return 1
+	} else {
+		if a.Minor < b.Minor {
+			return -1
+		} else if a.Minor > b.Minor {
+			return 1
+		} else {
+			if a.Patch < b.Patch {
+				return -1
+			} else if a.Patch > b.Patch {
+				return 1
+			} else {
+				return 0
+			}
+		}
+	}
 }
 
 // NON EXHAUSTIVE

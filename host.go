@@ -6,7 +6,7 @@ import (
 )
 
 // CONST
-var Host Triple
+var Host *Triple
 
 func init() {
 	triple, _ := map[string]string{
@@ -82,6 +82,6 @@ func BinaryFormatHost() BinaryFormat {
 	return Host.BinaryFormat
 }
 
-func TripleHost() Triple {
-	return Host
+func TripleHost() *Triple {
+	return Host.Clone()
 }
