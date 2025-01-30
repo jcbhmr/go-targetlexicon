@@ -4,8 +4,6 @@ package targetlexicon
 
 import (
 	"fmt"
-
-	"github.com/gohugoio/hashstructure"
 )
 
 // The size of a type.

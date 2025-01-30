@@ -84,6 +84,8 @@ Some conventions:
 - Since Rust unit tests have total access to the entire package's internals, ported unit tests should use `package targetlexicon` instead of `package targetlexicon_test`.
 - Rust crates are equivalent to Go packages. Avoid splitting things into `internal/*` Go packages since this causes circular import problems. Just keep everything in the root package.
 - Rust `my_crate::my_module::my_submodule::MyType` is equivalent to Go `mycrate.MyModuleMySubmoduleMyType`.
+- Each Rust file maps to a Go file with a similar name.
+- Rust uses camel case like "HtmlId" while Go uses "HTMLID". The Go convention should be followed.
 
 The generated `host.rs` is normally generated at build time by `build.rs` with the `TARGET` string. Instead we have to map Go's `$GOOS/$GOARCH` pairs to a valid LLVM target triple manually. There's also some `gnu`/`musl` and `gnu`/`msvc` detection that we do via C macros.
 
